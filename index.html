@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="id"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ludo Data Structure</title>
+<style>
+:root{--bg:#f4ecd8;--card:#fffaf0;--ink:#2b2340;--mut:#6b6280;--ac:#e4572e;--r:#e63946;--g:#2a9d5c;--y:#f4b400;--b:#2f6fed;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1d1830;--card:#2a2342;--ink:#f3ecff;--mut:#b2a8cc}}
+:root[data-theme="dark"]{--bg:#1d1830;--card:#2a2342;--ink:#f3ecff;--mut:#b2a8cc}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",sans-serif;min-height:100vh;padding:14px}
+h1,h2,h3{font-family:"Arial Black","Segoe UI",sans-serif;letter-spacing:.5px}
+.screen{display:none;max-width:760px;margin:0 auto}.screen.on{display:block}
+.card{background:var(--card);border:3px solid var(--ink);border-radius:18px;padding:20px;margin:12px 0;box-shadow:0 5px 0 var(--ink)}
+.btn{font:inherit;font-weight:800;border:3px solid var(--ink);border-radius:14px;padding:12px 22px;background:var(--y);color:#2b2340;cursor:pointer;box-shadow:0 4px 0 var(--ink);margin:6px}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.alt{background:var(--card);color:var(--ink)}.btn.go{background:var(--g);color:#fff}
+.center{text-align:center}
+.hero{text-align:center;padding:30px 10px}
+.hero h1{font-size:clamp(2rem,8vw,3.6rem);line-height:1}
+.hero .pw{display:flex;justify-content:center;gap:10px;margin:22px 0}
+.pw i{width:34px;height:34px;border-radius:50%;border:3px solid var(--ink);display:block;box-shadow:inset -4px -4px 0 rgba(0,0,0,.2)}
+.r{background:var(--r)}.g{background:var(--g)}.y{background:var(--y)}.b{background:var(--b)}
+.menu{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.menu .card{cursor:pointer;text-align:center;font-weight:800;font-size:1.1rem;margin:0}
+.menu .card span{display:block;font-size:2.2rem}
+p,li{line-height:1.7}ul,ol{margin-left:22px}
+pre{background:rgba(127,127,127,.15);border-radius:10px;padding:12px;overflow-x:auto;font-size:.95rem}
+table{width:100%;border-collapse:collapse;font-size:.92rem}td,th{border:2px solid var(--ink);padding:6px 8px;text-align:left}th{background:var(--ink);color:var(--bg)}
+input{font:inherit;padding:10px;border:3px solid var(--ink);border-radius:10px;width:100%;background:#fff;color:#222}
+.pc{display:grid;gap:10px;margin-top:10px}
+.pc label{display:flex;align-items:center;gap:10px;font-weight:700}
+.pc label i{width:26px;height:26px;border-radius:50%;border:3px solid var(--ink);flex:none}
+.hud{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:6px 0}
+.pl{padding:6px 14px;border:3px solid var(--ink);border-radius:30px;font-weight:800;color:#fff;font-size:.9rem;opacity:.6}
+.pl.y{color:#2b2340}.pl.on{opacity:1;transform:scale(1.1);box-shadow:0 3px 0 var(--ink)}
+.board{position:relative;width:min(100%,640px);aspect-ratio:1;margin:8px auto;display:grid;grid-template:repeat(15,1fr)/repeat(15,1fr);background:#fffdf5;border:5px solid var(--ink);border-radius:12px;overflow:hidden}
+.yard{display:grid;place-items:center;border:2px solid var(--ink)}
+.yin{width:62%;aspect-ratio:1;background:#fffdf5;border:3px solid var(--ink);border-radius:16px;display:grid;grid-template:1fr 1fr/1fr 1fr;gap:14%;padding:14%}
+.yin i{border-radius:50%;border:2px solid var(--ink);opacity:.8}
+.c{border:1px solid rgba(43,35,64,.35);display:grid;place-items:center;font-size:clamp(8px,2.6vw,17px);line-height:1;color:#2b2340}
+.c.t{background:#bfe8c9}.c.gg{background:#ffd9a8}.c.m{background:#cfe0ff}.c.ch{background:#ffb9c4}.c.bo{background:#fff09a}.c.n{background:#fffdf5}
+.c.r{background:var(--r)}.c.g{background:var(--g)}.c.y{background:var(--y)}.c.b{background:var(--b)}
+.mid{grid-area:7/7/10/10;background:conic-gradient(from 45deg,var(--g) 0 25%,var(--y) 0 50%,var(--b) 0 75%,var(--r) 0);border:2px solid var(--ink);display:grid;place-items:center;font-size:clamp(14px,5vw,30px)}
+.pawn{position:absolute;width:6.667%;height:6.667%;transition:left .25s,top .25s;display:grid;place-items:center;z-index:5;pointer-events:none}
+.pawn i{width:74%;height:74%;border-radius:50%;border:3px solid #fff;outline:2px solid var(--ink);box-shadow:inset -3px -3px 0 rgba(0,0,0,.25)}
+.pawn.act i{animation:hop .6s infinite alternate}@keyframes hop{to{transform:translateY(-22%)}}
+.dock{display:flex;align-items:center;justify-content:center;gap:14px;margin:10px 0;flex-wrap:wrap}
+.dice{width:72px;height:72px;background:#fff;color:#222;border:4px solid var(--ink);border-radius:16px;display:grid;place-items:center;font-size:3.4rem;box-shadow:0 4px 0 var(--ink)}
+.dice.roll{animation:rl .5s}@keyframes rl{to{transform:rotate(360deg)}}
+.legend{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:.8rem;justify-content:center}
+.modal{position:fixed;inset:0;background:rgba(10,5,25,.75);display:none;place-items:center;padding:14px;z-index:50}.modal.on{display:grid}
+.mb{background:var(--card);border:4px solid var(--ink);border-radius:20px;padding:20px;max-width:560px;width:100%;max-height:92vh;overflow:auto}
+.mh{display:flex;justify-content:space-between;align-items:center;font-weight:900}
+.tm{background:var(--ac);color:#fff;border-radius:10px;padding:4px 14px;font-size:1.3rem}
+.op{display:block;width:100%;text-align:left;font:inherit;padding:12px 14px;margin:8px 0;border:3px solid var(--ink);border-radius:12px;background:var(--card);color:var(--ink);cursor:pointer}
+.op.s{background:var(--y);color:#2b2340}.op.ok{background:var(--g);color:#fff}.op.no{background:var(--r);color:#fff}
+.ex{margin-top:10px;padding:12px;border-radius:12px;border:3px solid var(--ink);background:rgba(127,127,127,.15)}
+.toast{position:fixed;left:50%;top:14px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 20px;border-radius:30px;font-weight:800;z-index:99;max-width:90vw;text-align:center}
+.rk{display:flex;justify-content:space-between;padding:10px 14px;border:3px solid var(--ink);border-radius:12px;margin:8px 0;font-weight:800;background:var(--card)}
+textarea{width:100%;min-height:70px;font:inherit;padding:8px;border:3px solid var(--ink);border-radius:10px;margin:4px 0 10px;background:#fff;color:#222}
+.abar{display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin:10px 0;padding:10px;border:3px dashed var(--ink);border-radius:14px}
+.abar select{font:inherit;padding:8px;border:3px solid var(--ink);border-radius:10px;background:var(--card);color:var(--ink)}
+#ast{width:100%;color:var(--mut);font-size:.85rem;min-height:1.2em}
+.sp{font-size:.8rem;padding:6px 12px;margin-left:10px;vertical-align:middle}
+.rd{background:rgba(244,180,0,.28);border-radius:8px;box-shadow:0 0 0 4px rgba(244,180,0,.28)}
+.lsvg{width:100%;height:auto;color:var(--ink);background:rgba(127,127,127,.1);border-radius:12px;margin:8px 0;touch-action:manipulation}
+.chip{display:inline-block;padding:4px 12px;border:3px solid var(--ink);border-radius:20px;font-weight:800;margin:3px;font-size:.85rem;color:#2b2340}.chip.r{color:#fff}
+.ibox{padding:10px 14px;border:3px solid var(--ink);border-radius:12px;background:rgba(127,127,127,.12);margin:8px 0;min-height:48px}
+.ibox.win{background:var(--g);color:#fff}
+body{background-image:radial-gradient(rgba(127,127,127,.18) 2px,transparent 2px);background-size:26px 26px}
+.artwrap{position:relative;width:min(74vw,290px);margin:6px auto}
+.art{width:100%;height:auto;display:block;transform:rotate(-4deg);filter:drop-shadow(0 8px 0 rgba(43,35,64,.9))}
+.bob{animation:bob 1.4s ease-in-out infinite alternate}@keyframes bob{to{transform:translateY(-7px)}}
+.artdice{position:absolute;right:-18px;bottom:-14px;width:62px;height:62px;display:grid;place-items:center;background:#fff;color:#222;border:4px solid var(--ink);border-radius:14px;font-size:2.6rem;box-shadow:0 4px 0 var(--ink);animation:dz 2.4s ease-in-out infinite alternate}
+@keyframes dz{from{transform:rotate(-10deg)}to{transform:rotate(14deg) translateY(-6px)}}
+.mhero{text-align:center;padding:10px 0 4px}
+.mt{font-size:clamp(3rem,15vw,5rem);line-height:.95;margin-top:26px;text-shadow:0 4px 0 var(--ink)}
+.mt small{display:block;font-size:clamp(.9rem,4.4vw,1.4rem);letter-spacing:4px;color:var(--ink);text-shadow:none;margin-top:6px}
+.tag{display:inline-block;margin:12px 0 16px;padding:5px 18px;border:3px solid var(--ink);border-radius:30px;background:var(--card);font-weight:800;box-shadow:0 3px 0 var(--ink)}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:560px;margin:0 auto 20px}
+.tile{display:flex;align-items:center;gap:12px;padding:16px;border:4px solid var(--ink);border-radius:20px;box-shadow:0 6px 0 var(--ink);cursor:pointer;color:#fff;transition:transform .15s;position:relative;overflow:hidden}
+.tile:hover{transform:translateY(-4px)}.tile:active{transform:translateY(4px);box-shadow:0 2px 0 var(--ink)}
+.tile::after{content:"";position:absolute;right:-22px;top:-22px;width:70px;height:70px;border-radius:50%;background:rgba(255,255,255,.22)}
+.tile b{font-size:2.2rem;line-height:1;filter:drop-shadow(0 2px 0 rgba(0,0,0,.25))}
+.tile h3{font-size:1.05rem}.tile small{display:block;font-size:.78rem;opacity:.92;line-height:1.3}
+.tile.y{color:#2b2340}.tile.d{background:#4a3f6b}
+.tile.wide{grid-column:1/-1;padding:20px}.tile.wide b{font-size:3rem}.tile.wide h3{font-size:1.5rem}
+.trophy{font-size:4rem;display:inline-block;animation:tro 1.4s ease-in-out infinite alternate}
+@keyframes tro{from{transform:translateY(0) rotate(-8deg) scale(1)}to{transform:translateY(-10px) rotate(8deg) scale(1.15)}}
+#winbox{margin:10px auto 16px;padding:16px 10px;max-width:420px;border:4px solid var(--ink);border-radius:20px;background:linear-gradient(135deg,#ffe27a,#f4b400);color:#2b2340;box-shadow:0 6px 0 var(--ink);animation:popin .7s cubic-bezier(.2,1.6,.4,1) both;position:relative;overflow:hidden}
+#winbox::after{content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.7),transparent);animation:shine 2.2s ease-in-out infinite}
+@keyframes shine{to{left:130%}}@keyframes popin{from{transform:scale(0) rotate(-12deg)}to{transform:scale(1) rotate(0)}}
+.crown{font-size:2.6rem;animation:crown 1s .5s cubic-bezier(.3,1.5,.5,1) both}@keyframes crown{from{transform:translateY(-60px) rotate(-30deg);opacity:0}to{transform:none;opacity:1}}
+.wn{font-size:clamp(2rem,9vw,3.2rem);font-weight:900;line-height:1.1;-webkit-text-stroke:2px var(--ink);paint-order:stroke fill;animation:glow .9s ease-in-out infinite alternate}
+@keyframes glow{to{transform:scale(1.08)}}.wl{font-weight:800}.wp{font-size:1.4rem;font-weight:900}
+.pod{display:flex;justify-content:center;align-items:flex-end;gap:8px;margin:16px auto;max-width:440px;min-height:60px}
+.pcol{flex:1;text-align:center;font-weight:800;min-width:0}.pcol .pn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.9rem;padding:0 2px}
+.pb{height:0;border:4px solid var(--ink);border-bottom:0;border-radius:12px 12px 0 0;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:6px;color:#fff;overflow:hidden;animation:rise .8s cubic-bezier(.2,1.2,.4,1) forwards}
+.pb.y{color:#2b2340}@keyframes rise{to{height:var(--h)}}
+.pawn.win i{animation:spin .6s linear 3}@keyframes spin{to{transform:rotate(360deg) scale(1.5)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head><body>
+
+<div id="splash" class="screen on"><div class="card hero"><div class="artwrap"><svg class="art" viewBox="0 0 300 300" role="img" aria-label="Papan Ludo"></svg><div class="artdice">⚅</div></div>
+<h1 style="margin-top:22px">LUDO<br>DATA STRUCTURE</h1><p style="margin:14px 0 20px">Lempar dadu, jawab soal Tree &amp; Graph, jadi yang pertama sampai rumah.</p>
+<button class="btn go" onclick="show('menu')">Mulai</button></div></div>
+
+<div id="menu" class="screen"><div class="mhero"><div class="artwrap"><svg class="art" viewBox="0 0 300 300" role="img" aria-label="Papan Ludo"></svg><div class="artdice">⚅</div></div>
+<h1 class="mt"><span style="color:var(--r)">L</span><span style="color:var(--g)">U</span><span style="color:var(--y)">D</span><span style="color:var(--b)">O</span><small>DATA STRUCTURE</small></h1>
+<p class="tag">Play, Think, Understand!</p></div>
+<div class="tiles">
+<div class="tile g wide" onclick="show('players')"><b>🎲</b><div><h3>Mulai Main</h3><small>Tantang temanmu, jawab soal Tree &amp; Graph!</small></div></div>
+<div class="tile b" onclick="show('materi')"><b>📚</b><div><h3>Materi</h3><small>Baca &amp; dengarkan</small></div></div>
+<div class="tile y" onclick="show('lab')"><b>🧪</b><div><h3>Lab Praktik</h3><small>Lihat, dengar, coba</small></div></div>
+<div class="tile r" onclick="show('cara')"><b>❓</b><div><h3>Cara Bermain</h3><small>Aturan &amp; poin</small></div></div>
+<div class="tile d" onclick="show('tentang')"><b>ℹ️</b><div><h3>Tentang</h3><small>Tujuan belajar</small></div></div>
+</div></div>
+
+<div id="materi" class="screen"><div class="card"><h2>Materi</h2>
+<h3 style="margin-top:12px">Struktur Data</h3><p>Cara menyimpan dan mengatur data agar mudah dicari dan diubah, seperti cara menata isi lemari.</p>
+<h3 style="margin-top:12px">Tree</h3><p>Struktur hierarki tanpa siklus. Ada satu <b>Root</b> di atas. <b>Parent</b> punya <b>Child</b>; node dengan parent yang sama disebut <b>Sibling</b>; node tanpa child disebut <b>Leaf</b>. Root berada di level 0.</p>
+<pre data-say="Contoh: A adalah root di level nol. B dan C adalah child dari A di level satu. D dan E adalah child dari B, keduanya leaf di level dua.">      A   (Root, level 0)
+     / \
+    B   C (level 1)
+   / \
+  D   E   (Leaf, level 2)</pre><p>Tree dengan n node selalu punya n − 1 edge.</p>
+<h3 style="margin-top:12px">Graph</h3><p>Kumpulan <b>Vertex</b> (node) yang dihubungkan <b>Edge</b>. <b>Path</b> adalah jalur antar vertex, <b>Degree</b> adalah jumlah edge pada sebuah vertex. Graph boleh punya siklus dan bisa berarah (directed) atau tidak (undirected).</p>
+<pre data-say="Contoh: ada empat vertex, yaitu A, B, C, dan D. A terhubung ke B dan C, B terhubung ke D, C terhubung ke D. Jadi ada empat edge.">A ━━ B
+┃    ┃
+C ━━ D</pre>
+<h3 style="margin-top:12px">Tree vs Graph</h3><table><tr><th></th><th>Tree</th><th>Graph</th></tr><tr><td>Bentuk</td><td>Hierarki</td><td>Jaringan bebas</td></tr><tr><td>Root</td><td>Ada satu</td><td>Tidak ada</td></tr><tr><td>Siklus</td><td>Tidak boleh</td><td>Boleh</td></tr><tr><td>Edge</td><td>n − 1</td><td>Bebas</td></tr></table>
+<p style="margin-top:10px"><b>Tree:</b> folder komputer, struktur organisasi. <b>Graph:</b> peta jalan, media sosial, jaringan komputer.</p>
+<div class="center"><button class="btn alt" onclick="show('menu')">Kembali</button><button class="btn" onclick="show('lab')">🧪 Lab Praktik</button><button class="btn go" onclick="show('players')">Main</button></div></div></div>
+
+<div id="cara" class="screen"><div class="card"><h2>Cara Bermain</h2><ol style="margin-top:10px">
+<li>Pilih 2–4 pemain. Tiap pemain punya 1 pion dan mulai dari petak berwarna miliknya.</li>
+<li>Bergiliran lempar dadu, pion berjalan searah jarum jam. Tidak ada mundur.</li>
+<li>Berhenti di petak bergambar: jawab soal sebelum waktu habis.</li>
+<li>Setelah satu putaran, pion masuk lorong warna menuju pusat papan.</li>
+<li><b>Pemain pertama yang sampai pusat menang</b> (+200 poin). Jika waktu 20 menit habis, skor tertinggi menang.</li></ol>
+<table style="margin-top:12px"><tr><th>Petak</th><th>Poin</th></tr><tr><td>🌳 Tree</td><td>+50</td></tr><tr><td>📊 Graph</td><td>+50</td></tr><tr><td>🔀 Mix</td><td>+100</td></tr><tr><td>⚡ Challenge (soal sulit)</td><td>+150</td></tr><tr><td>⭐ Bonus</td><td>+100 otomatis</td></tr></table>
+<p>Jawaban salah tidak mengurangi poin.</p>
+<div class="center"><button class="btn alt" onclick="show('menu')">Kembali</button><button class="btn go" onclick="show('players')">Main</button></div></div></div>
+
+<div id="tentang" class="screen"><div class="card"><h2>Tentang</h2><p style="margin-top:10px">Game edukasi untuk memahami Tree dan Graph lewat permainan Ludo. Alurnya: memahami (materi), menerapkan (soal di papan), merefleksikan (refleksi akhir). Cocok untuk sesi kelas 15–20 menit.</p><p style="margin-top:10px">Game ini mendukung beragam gaya belajar: <b>visual</b> (diagram dan warna), <b>auditori</b> (narasi suara di Materi dan Lab), dan <b>kinestetik</b> (game serta Lab Praktik). Siswa tidak terkunci pada satu gaya; gunakan ketiganya bergantian: lihat diagram, dengarkan penjelasan, lalu coba sendiri.</p>
+<div class="center"><button class="btn alt" onclick="show('menu')">Kembali</button></div></div></div>
+
+<div id="lab" class="screen"><div class="card"><h2>Lab Praktik</h2>
+<p>Lihat dulu, dengarkan penjelasannya, lalu coba sendiri.</p>
+<label style="font-weight:700"><input type="checkbox" id="au" checked style="width:auto"> 🔊 Bacakan penjelasan otomatis</label>
+<div class="center" style="margin:10px 0"><button class="btn" id="tb1" onclick="tab(1)">👁️ Lihat</button><button class="btn alt" id="tb2" onclick="tab(2)">✋ Coba</button></div>
+<div id="t1"><h3>Tree: ketuk sebuah node</h3>
+<div><span class="chip r">Root</span><span class="chip y">Parent (punya child)</span><span class="chip g">Leaf</span></div>
+<svg id="tsvg" class="lsvg" viewBox="0 0 400 215"></svg>
+<div class="ibox" id="tinfo">Ketuk node A, B, C, D, atau E.</div>
+<h3 style="margin-top:16px">Graph: ketuk sebuah vertex</h3>
+<svg id="gsvg" class="lsvg" viewBox="0 0 400 210"></svg>
+<div class="ibox" id="ginfo">Ketuk vertex untuk melihat degree dan edge-nya.</div></div>
+<div id="t2" style="display:none"><h3>Bangun Graph sendiri</h3>
+<p>Ketuk dua vertex untuk membuat edge. Ketuk pasangan yang sama lagi untuk menghapusnya.</p>
+<div class="center"><button class="btn alt" onclick="goal(1)">Tantangan 1: buat Tree</button><button class="btn alt" onclick="goal(2)">Tantangan 2: buat siklus</button><button class="btn alt" onclick="goal(3)">Tantangan 3: A berderajat 3</button></div>
+<div class="ibox" id="gl">Pilih tantangan, atau bereksperimen bebas.</div>
+<svg id="bsvg" class="lsvg" viewBox="0 0 400 260"></svg>
+<div class="ibox" id="bstat"></div>
+<div class="center"><button class="btn alt" onclick="BE.clear();drawB()">Reset</button></div></div>
+<div class="center"><button class="btn alt" onclick="show('menu')">Kembali</button><button class="btn go" onclick="show('players')">Main</button></div></div></div>
+
+<div id="players" class="screen"><div class="card center"><h2>Berapa pemain?</h2>
+<div><button class="btn alt" onclick="pickN(2)">2</button><button class="btn alt" onclick="pickN(3)">3</button><button class="btn alt" onclick="pickN(4)">4</button></div>
+<div id="pin" class="pc"></div>
+<div><button class="btn alt" onclick="show('menu')">Kembali</button><button id="sg" class="btn go" style="display:none" onclick="start()">Mulai main</button></div></div></div>
+
+<div id="game" class="screen"><div class="hud" id="hud"></div>
+<div class="center" style="font-weight:800">Giliran: <span id="turn"></span> &nbsp;|&nbsp; ⏱ <span id="clock">00:00</span></div>
+<div class="board" id="board"></div>
+<div class="dock"><div class="dice" id="dice">🎲</div><button class="btn go" id="rb" onclick="roll()">Lempar dadu</button></div>
+<div class="legend"><span>🌳 Tree</span><span>📊 Graph</span><span>🔀 Mix</span><span>⚡ Challenge</span><span>⭐ Bonus</span></div>
+<div class="center"><button class="btn alt" onclick="if(confirm('Keluar dari permainan?'))quit()">Keluar</button></div></div>
+
+<div id="hasil" class="screen"><div class="card center"><div class="trophy">🏆</div><h2>Hasil Permainan</h2><div id="winbox"></div><div class="pod" id="pod"></div><div id="rank"></div><p id="stat" style="color:var(--mut)"></p></div>
+<div class="card"><h3>Refleksi</h3>
+<label>1. Apa beda Tree dan Graph menurutmu?</label><textarea id="f1"></textarea>
+<label>2. Soal mana yang paling membuatmu berpikir?</label><textarea id="f2"></textarea>
+<label>3. Di mana kamu menemukan Tree dan Graph dalam kehidupan sehari-hari?</label><textarea id="f3"></textarea>
+<label>4. Strategi apa yang kamu pakai saat menjawab?</label><textarea id="f4"></textarea>
+<button class="btn go" onclick="copyRef()">Salin refleksi</button></div>
+<div class="center"><button class="btn" onclick="show('players')">Main lagi</button><button class="btn alt" onclick="show('materi')">Materi</button><button class="btn alt" onclick="show('menu')">Menu</button></div></div>
+
+<canvas id="cf" style="position:fixed;inset:0;pointer-events:none;z-index:90"></canvas>
+<div class="modal" id="modal"><div class="mb"><div class="mh"><span id="qcat"></span><span class="tm" id="qt">20</span></div>
+<p id="qtx" style="margin:12px 0;font-weight:700"></p><pre id="qv" style="display:none"></pre><div id="qo"></div>
+<button class="btn go" id="qb" style="width:100%;margin:6px 0" disabled onclick="answer()">Jawab</button><div id="qe"></div></div></div>
+
+<script>
+const $=id=>document.getElementById(id);
+function show(s){if(window.stopAudio)stopAudio();document.querySelectorAll('.screen').forEach(e=>e.classList.remove('on'));$(s).classList.add('on');scrollTo(0,0)}
+let ac;function beep(f,d){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain();o.connect(g);g.connect(ac.destination);o.frequency.value=f;g.gain.setValueAtTime(.12,ac.currentTime);g.gain.exponentialRampToValueAtTime(.01,ac.currentTime+d);o.start();o.stop(ac.currentTime+d)}catch(e){}}
+function toast(t){const e=document.createElement('div');e.className='toast';e.textContent=t;document.body.appendChild(e);setTimeout(()=>e.remove(),2200)}
+
+// ===== PAPAN =====
+const TR=[];(()=>{const a=(c,r)=>TR.push([c,r]);
+for(let c=1;c<=5;c++)a(c,6);for(let r=5;r>=0;r--)a(6,r);a(7,0);a(8,0);for(let r=1;r<=5;r++)a(8,r);
+for(let c=9;c<=14;c++)a(c,6);a(14,7);a(14,8);for(let c=13;c>=9;c--)a(c,8);for(let r=9;r<=14;r++)a(8,r);
+a(7,14);a(6,14);for(let r=13;r>=9;r--)a(6,r);for(let c=5;c>=0;c--)a(c,8);a(0,7);a(0,6)})();
+const COL=[
+ {k:'r',n:'Merah',off:0,home:[1,2,3,4,5].map(c=>[c,7]),yard:[1,10]},
+ {k:'g',n:'Hijau',off:13,home:[1,2,3,4,5].map(r=>[7,r]),yard:[10,1]},
+ {k:'y',n:'Kuning',off:26,home:[13,12,11,10,9].map(c=>[c,7]),yard:[10,10]},
+ {k:'b',n:'Biru',off:39,home:[13,12,11,10,9].map(r=>[7,r]),yard:[1,1]}];
+// yard: [kolom,baris] CSS grid (mulai 1). Merah kiri-atas, Hijau kanan-atas, Kuning kanan-bawah, Biru kiri-bawah
+COL[0].yard=[1,1];COL[1].yard=[10,1];COL[2].yard=[10,10];COL[3].yard=[1,10];
+const TY=['n','t','n','gg','bo','n','m','t','n','gg','ch','n','t'];
+const IC={t:'🌳',gg:'📊',m:'🔀',ch:'⚡',bo:'⭐',n:''};
+const cellOf=(p,pos)=>pos<=50?TR[(p.off+pos)%52]:pos<=55?p.home[pos-51]:[7,7];
+const typeOf=(p,pos)=>pos<=50?TY[(p.off+pos)%52%13]:pos<=55?'n':'f';
+let G={};
+function buildBoard(){const b=$('board');b.innerHTML='';
+ COL.forEach(c=>{const y=document.createElement('div');y.className='yard '+c.k;y.style.gridArea=`${c.yard[1]}/${c.yard[0]}/span 6/span 6`;y.innerHTML='<div class="yin"><i class="'+c.k+'"></i><i class="'+c.k+'"></i><i class="'+c.k+'"></i><i class="'+c.k+'"></i></div>';b.appendChild(y)});
+ const starts={0:'r',13:'g',26:'y',39:'b'};
+ TR.forEach(([c,r],i)=>{const d=document.createElement('div');const t=TY[i%13];d.className='c '+(starts[i]||t);d.style.gridArea=`${r+1}/${c+1}`;d.textContent=starts[i]?'▶':IC[t];b.appendChild(d)});
+ COL.forEach(c=>c.home.forEach(([x,y])=>{const d=document.createElement('div');d.className='c '+c.k;d.style.cssText=`grid-area:${y+1}/${x+1};opacity:.85`;b.appendChild(d)}));
+ const m=document.createElement('div');m.className='mid';m.textContent='🏁';b.appendChild(m);
+ G.players.forEach((p,i)=>{const e=document.createElement('div');e.className='pawn';e.id='pw'+i;e.innerHTML='<i class="'+p.k+'"></i>';b.appendChild(e);place(i)})}
+function place(i){const p=G.players[i],[c,r]=cellOf(p,p.pos),e=$('pw'+i),o=(i%2?1:-1)*(i<2?.9:-.9);
+ e.style.left=(c*100/15+(p.pos===56?(i-1.5)*1.1:0))+'%';e.style.top=(r*100/15+(p.pos===56?(i%2?1:-1)*.9:0))+'%'}
+
+// ===== SOAL ===== [kategori, soal, visual, opsi, indeksBenar, penjelasan, sulit]
+const T1='    A\n   / \\\n  B   C\n / \\\nD   E';
+const Q=[
+['t','Node paling atas dalam Tree disebut...','',['Leaf','Root','Branch','Trunk'],1,'Root adalah node paling atas, titik awal Tree.'],
+['t','Node yang tidak punya child disebut...','',['Root','Parent','Leaf','Sibling'],2,'Leaf berada di ujung cabang dan tidak punya child.'],
+['t','Node yang punya child disebut...','',['Leaf','Parent','Sibling','Root'],1,'Parent adalah node yang punya satu atau lebih child.'],
+['t','Pasangan node mana yang Sibling dan sama-sama Leaf?',T1,['A dan B','B dan D','D dan E','C dan D'],2,'D dan E satu parent (B) dan keduanya tidak punya child.'],
+['t','Berapa jumlah Leaf pada Tree ini?',T1,['1','2','3','4'],2,'Leaf-nya D, E, dan C, jadi ada 3.'],
+['t','Pada Tree ini (A level 0), node D ada di level...',T1,['0','1','2','3'],2,'A level 0, B dan C level 1, D dan E level 2.'],
+['t','Ciri utama Tree adalah...','',['Boleh ada siklus','Tidak punya root','Setiap node (kecuali root) punya tepat satu parent','Semua node punya jumlah child sama'],2,'Setiap node selain root punya tepat satu parent, dan tidak ada siklus.'],
+['t','Tree dengan 8 node punya berapa edge?','      A\n     /|\\\n    B C D\n   /|   |\\\n  E F   G H',['6','7','8','9'],1,'Edge Tree = n − 1 = 7.',1],
+['t','Pada Binary Tree, setiap node punya paling banyak berapa child?','',['1','2','3','Tidak terbatas'],1,'Binary Tree membatasi child menjadi kiri dan kanan, maksimal 2.',1],
+['t','Jika dua Leaf pada Tree dihubungkan dengan sebuah edge, yang terjadi...','',['Tetap Tree','Menjadi Graph karena terbentuk siklus','Tree jadi lebih efisien','Tidak ada perubahan'],1,'Edge baru membentuk siklus, sehingga bukan Tree lagi.',1],
+['g','Kumpulan node yang dihubungkan edge disebut...','',['Tree','Graph','Array','Stack'],1,'Itulah definisi Graph.'],
+['g','Titik atau simpul pada Graph disebut...','',['Edge','Vertex','Root','Leaf'],1,'Vertex (node) adalah titik pada Graph.'],
+['g','Garis yang menghubungkan dua vertex disebut...','',['Edge','Path','Root','Leaf'],0,'Edge adalah sisi penghubung vertex.'],
+['g','Jalur dari satu vertex ke vertex lain disebut...','',['Edge','Path','Degree','Root'],1,'Path adalah rute lewat edge-edge.'],
+['g','Berapa degree vertex A?','A ━━ B\n┃    ┃\nC ━━ D',['1','2','3','4'],1,'A terhubung ke B dan C, jadi degree = 2.'],
+['g','Berapa jumlah edge pada Graph ini?','A ━━ B\n┃    ┃\nC ━━ D',['3','4','5','6'],1,'Edge: A-B, A-C, B-D, C-D = 4.'],
+['g','Beda Directed dan Undirected Graph adalah...','',['Tidak ada beda','Directed punya arah pada edge, Undirected tidak','Directed lebih cepat','Directed hanya untuk angka'],1,'Pada Directed, A→B tidak sama dengan B→A.'],
+['g','Graph: edge A-B, B-C, C-D, D-A, A-C. Berapa degree A?','',['2','3','4','5'],1,'A terhubung ke B, D, dan C, jadi degree = 3.',1],
+['g','Complete Graph dengan 5 vertex punya berapa edge?','',['5','8','10','15'],2,'n(n−1)/2 = 5×4/2 = 10.',1],
+['g','Contoh Graph dalam kehidupan nyata adalah...','',['Struktur organisasi','Sistem folder','Jaringan jalan di peta GPS','Menu restoran'],2,'Kota = vertex, jalan = edge, dan ada banyak jalur serta siklus.',1],
+['m','Beda utama Tree dan Graph adalah...','',['Tree boleh siklus, Graph tidak','Tree hierarki tanpa siklus, Graph boleh siklus','Tree selalu lebih cepat','Tidak ada beda'],1,'Tree adalah hierarki tanpa siklus; Graph bebas dan boleh bersiklus.'],
+['m','Pernyataan yang benar adalah...','',['Setiap Tree adalah Graph','Setiap Graph adalah Tree','Tree dan Graph tak berhubungan','Tree lebih kompleks dari Graph'],0,'Tree adalah Graph khusus: terhubung dan tanpa siklus.'],
+['m','Apakah Graph punya konsep Root khusus?','',['Ya, selalu','Tidak ada Root khusus','Hanya Directed Graph','Graph punya banyak Root'],1,'Semua vertex pada Graph setara, tidak ada hierarki.'],
+['m','Folder komputer adalah Tree. Jika dibuat shortcut yang menghubungkan dua folder, strukturnya menjadi...','',['Tetap Tree','Graph','Tidak valid','Lebih sederhana'],1,'Shortcut menambah koneksi yang bisa membentuk siklus.',1],
+['m','Tree 10 node ditambah 1 edge. Total edge sekarang?','',['9','10','11','12'],1,'Tree 10 node punya 9 edge; ditambah 1 menjadi 10.',1],
+['m','Struktur paling cocok untuk "teman yang mungkin kamu kenal" adalah...','',['Tree','Graph','Array sederhana','Stack'],1,'Hubungan pertemanan banyak arah dan bersiklus, cocok untuk Graph.',1],
+['m','Struktur perusahaan dengan CEO di puncak paling tepat digambarkan dengan...','',['Graph','Tree','Array','Tidak bisa'],1,'Setiap karyawan punya satu atasan langsung dan tanpa siklus.',1],
+['m','Rumus edge = n − 1 berlaku untuk...','',['Semua Graph','Tree','Hanya Directed Graph','Hanya Undirected Graph'],1,'Rumus itu khusus Tree; Graph bisa punya lebih banyak atau lebih sedikit edge.',1]];
+let deck={};
+function pick(kind){const k=kind;if(!deck[k]||!deck[k].length){let pool=k==='ch'?Q.filter(q=>q[6]):Q.filter(q=>q[0]===k);deck[k]=[...pool].sort(()=>Math.random()-.5)}return deck[k].pop()}
+
+// ===== ALUR GAME =====
+function pickN(n){G.n=n;const nm=['Merah','Biru','Hijau','Kuning'];const order=n===2?[0,2]:n===3?[0,1,2]:[0,1,2,3];
+ $('pin').innerHTML=order.map((ci,i)=>`<label><i class="${COL[ci].k}"></i><input id="nm${i}" value="Pemain ${i+1}" maxlength="14"></label>`).join('');
+ G.order=order;$('sg').style.display='inline-block'}
+function start(){clearInterval(G.gt);clearInterval(G.qt);
+ const order=G.order;G={order,over:false,t0:Date.now(),cur:0,tot:0,ok:0,players:order.map((ci,i)=>({...COL[ci],name:($('nm'+i).value||'Pemain '+(i+1)).trim(),pos:0,score:0,ok:0,bad:0}))};
+ buildBoard();hud();show('game');$('dice').textContent='🎲';$('rb').disabled=false;turn();
+ G.gt=setInterval(()=>{const s=Math.floor((Date.now()-G.t0)/1000);$('clock').textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');if(s>=1200)finish(null)},1000)}
+function hud(){$('hud').innerHTML=G.players.map((p,i)=>`<span class="pl ${p.k} ${i===G.cur?'on':''}">${p.name}: ${p.score}</span>`).join('')}
+function turn(){const p=G.players[G.cur];$('turn').textContent=p.name;document.querySelectorAll('.pawn').forEach((e,i)=>e.classList.toggle('act',i===G.cur));hud()}
+function quit(){clearInterval(G.gt);clearInterval(G.qt);$('modal').classList.remove('on');show('menu')}
+function roll(){if(G.over)return;beep(700,.1);$('rb').disabled=true;const d=$('dice'),f='⚀⚁⚂⚃⚄⚅';d.classList.add('roll');let n=0;
+ const iv=setInterval(()=>{d.textContent=f[Math.floor(Math.random()*6)];if(++n>=9){clearInterval(iv);d.classList.remove('roll');const v=1+Math.floor(Math.random()*6);d.textContent=f[v-1];setTimeout(()=>move(v),350)}},80)}
+function move(v){const i=G.cur,p=G.players[i],target=Math.min(p.pos+v,56);
+ const iv=setInterval(()=>{if(p.pos<target){p.pos++;place(i);beep(500,.05)}else{clearInterval(iv);setTimeout(()=>act(p),350)}},260)}
+function act(p){const t=typeOf(p,p.pos);
+ if(t==='f'){p.score+=200;hud();fx(G.cur);toast('🏁 '+p.name+' sampai pusat! +200');return setTimeout(()=>finish(p),1500)}
+ if(t==='bo'){p.score+=100;hud();beep(1000,.3);toast('⭐ Bonus +100');return setTimeout(next,1400)}
+ if(t==='n')return next();
+ ask(t==='gg'?'g':t)}
+function next(){G.cur=(G.cur+1)%G.players.length;turn();$('rb').disabled=false}
+
+// ===== SOAL MODAL =====
+function ask(kind){const q=pick(kind);G.tot++;G.kind=kind;
+ const idx=q[3].map((_,i)=>i).sort(()=>Math.random()-.5);G.q={q,opts:idx,right:idx.indexOf(q[4]),sel:-1,pts:{t:50,g:50,m:100,ch:150}[kind]};
+ $('qcat').textContent={t:'🌳 Tree',g:'📊 Graph',m:'🔀 Tree & Graph',ch:'⚡ Challenge'}[kind];
+ $('qtx').textContent=q[1];const v=$('qv');v.style.display=q[2]?'block':'none';v.textContent=q[2];
+ $('qo').innerHTML=idx.map((o,i)=>`<button class="op" onclick="sel(${i})">${q[3][o]}</button>`).join('');
+ $('qb').disabled=true;$('qe').innerHTML='';
+ G.tl=q[6]?40:kind==='m'?30:25;$('qt').textContent=G.tl;
+ clearInterval(G.qt);G.qt=setInterval(()=>{$('qt').textContent=--G.tl;if(G.tl<=0){clearInterval(G.qt);resolve(false,'Waktu habis.')}},1000);
+ $('modal').classList.add('on')}
+function sel(i){if(G.q.done)return;beep(800,.06);G.q.sel=i;document.querySelectorAll('.op').forEach((e,j)=>e.classList.toggle('s',j===i));$('qb').disabled=false}
+function answer(){if(G.q.sel<0||G.q.done)return;clearInterval(G.qt);resolve(G.q.sel===G.q.right,'')}
+function resolve(ok,msg){if(G.q.done)return;G.q.done=true;clearInterval(G.qt);const p=G.players[G.cur];
+ document.querySelectorAll('.op').forEach((e,j)=>{e.classList.remove('s');if(j===G.q.right)e.classList.add('ok');else if(j===G.q.sel&&!ok)e.classList.add('no')});
+ $('qb').disabled=true;
+ if(ok){p.ok++;G.ok++;p.score+=G.q.pts;beep(1000,.3)}else{p.bad++;beep(300,.25)}
+ $('qe').innerHTML=`<div class="ex"><b>${ok?'Benar! +'+G.q.pts+' poin':'Belum tepat. '+msg}</b><br>${G.q.q[5]}</div><button class="btn go" style="width:100%;margin-top:8px" onclick="closeQ()">Lanjut</button>`;hud()}
+function closeQ(){$('modal').classList.remove('on');if(!G.over)next()}
+
+// ===== HASIL =====
+function finish(w){if(G.over)return;G.over=true;clearInterval(G.gt);clearInterval(G.qt);$('modal').classList.remove('on');
+ const r=[...G.players].sort((a,b)=>(b===w)-(a===w)||b.score-a.score);
+ $('rank').innerHTML=r.map((p,i)=>`<div class="rk"><span>${['🥇','🥈','🥉','4️⃣'][i]} ${p.name} (${p.n})</span><span>${p.score} poin · ✔${p.ok} ✘${p.bad}</span></div>`).join('');
+ const s=Math.floor((Date.now()-G.t0)/1000);
+ $('stat').textContent=`${G.tot} soal dijawab, ${G.ok} benar, waktu ${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}. ${w?w.name+' menang karena sampai pusat lebih dulu.':'Waktu habis, pemenang ditentukan dari skor tertinggi.'}`;
+ ['f1','f2','f3','f4'].forEach(i=>$(i).value='');show('hasil');celebrate(r,w)}
+function copyRef(){const t=['Beda Tree dan Graph','Soal yang paling membuat berpikir','Contoh Tree/Graph sehari-hari','Strategi'].map((l,i)=>l+': '+$('f'+(i+1)).value).join('\n');
+ try{navigator.clipboard.writeText(t).then(()=>toast('Refleksi disalin'),()=>toast('Gagal menyalin, salin manual'))}catch(e){toast('Gagal menyalin, salin manual')}}
+
+// ===== AUDIO MATERI =====
+const AU={tok:0,run:false,q:[],i:0,rate:1,secs:[],paused:false};
+function textOf(e){if(e.dataset.say)return e.dataset.say;
+ if(e.tagName==='TABLE'){const r=[...e.rows],h=[...r[0].cells].map(c=>c.textContent);return r.slice(1).map(x=>[...x.cells].map((c,i)=>i?h[i]+': '+c.textContent:c.textContent).join('. ')).join('. ')}
+ return e.textContent}
+function initAudio(){const card=document.querySelector('#materi .card');let cur=null;
+ [...card.children].forEach(e=>{if(e.tagName==='H3'){cur={h:e,els:[]};AU.secs.push(cur)}else if(cur&&!e.classList.contains('center'))cur.els.push(e)});
+ AU.secs.forEach((s,k)=>{s.title=s.h.textContent;
+  s.text=[s.h,...s.els].map(textOf).map(t=>t.trim().replace(/\.$/,'').replace(/n − 1/g,'n dikurangi satu')).join('. ')+'.';
+  const b=document.createElement('button');b.className='btn alt sp';b.textContent='🔊 Dengarkan';b.onclick=()=>playSecs([k]);s.h.appendChild(b)});
+ const bar=document.createElement('div');bar.className='abar';
+ bar.innerHTML='<button class="btn go" onclick="playSecs(AU.secs.map((_,i)=>i))">▶ Putar semua materi</button><button class="btn alt" id="pa" onclick="pauseAudio()">⏸ Jeda</button><button class="btn alt" onclick="stopAudio()">⏹ Stop</button><select id="rate" aria-label="Kecepatan suara" onchange="AU.rate=+this.value"><option value="0.8">Lambat</option><option value="1" selected>Normal</option><option value="1.25">Cepat</option></select><p id="ast"></p>';
+ card.querySelector('h2').after(bar)}
+function hl(k){AU.secs.forEach((s,j)=>[s.h,...s.els].forEach(e=>e.classList.toggle('rd',j===k)));
+ if(k>=0)AU.secs[k].h.scrollIntoView({behavior:'smooth',block:'center'})}
+function playSecs(list){if(!('speechSynthesis' in window)){toast('Browser ini belum mendukung suara. Coba Chrome atau Edge.');return}
+ stopAudio();const vs=speechSynthesis.getVoices();
+ if(vs.length&&!vs.some(v=>v.lang.toLowerCase().startsWith('id')))toast('Suara Indonesia tidak ditemukan, memakai suara bawaan perangkat');
+ AU.q=[];list.forEach(k=>AU.secs[k].text.split(/(?<=[.!?:])\s+/).forEach(t=>t.trim()&&AU.q.push({k,t})));
+ AU.i=0;AU.run=true;AU.paused=false;speakNext()}
+function speakNext(){const tk=AU.tok;if(!AU.run)return;
+ if(AU.i>=AU.q.length){stopAudio();return}
+ const it=AU.q[AU.i];hl(it.k);$('ast').textContent='Sedang membaca: '+AU.secs[it.k].title;
+ const u=new SpeechSynthesisUtterance(it.t);u.lang='id-ID';u.rate=AU.rate;
+ const v=speechSynthesis.getVoices().find(v=>v.lang.toLowerCase().startsWith('id'));if(v)u.voice=v;
+ const go=()=>{if(tk===AU.tok){AU.i++;speakNext()}};u.onend=go;u.onerror=go;speechSynthesis.speak(u)}
+function pauseAudio(){if(!AU.run)return;AU.paused=!AU.paused;AU.paused?speechSynthesis.pause():speechSynthesis.resume();$('pa').textContent=AU.paused?'▶ Lanjut':'⏸ Jeda'}
+function stopAudio(){AU.tok++;AU.run=false;AU.paused=false;try{speechSynthesis.cancel()}catch(e){}
+ if(AU.secs.length){hl(-1);$('ast').textContent='';$('pa').textContent='⏸ Jeda'}}
+initAudio();if('speechSynthesis' in window)speechSynthesis.getVoices();
+// ===== LAB PRAKTIK =====
+const NS='http://www.w3.org/2000/svg';
+function el(t,a,p){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e}
+function say(t){if($('au').checked&&'speechSynthesis' in window){try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='id-ID';speechSynthesis.speak(u)}catch(e){}}}
+function tab(n){$('t1').style.display=n===1?'block':'none';$('t2').style.display=n===2?'block':'none';$('tb1').className='btn'+(n===1?'':' alt');$('tb2').className='btn'+(n===2?'':' alt')}
+const TN={A:[200,32,null,0],B:[110,105,'A',1],C:[290,105,'A',1],D:[60,180,'B',2],E:[160,180,'B',2]};
+function drawTree(){const s=$('tsvg');
+ Object.values(TN).forEach(v=>{if(v[2])el('line',{x1:TN[v[2]][0],y1:TN[v[2]][1],x2:v[0],y2:v[1],stroke:'currentColor','stroke-width':3},s)});
+ [32,105,180].forEach((y,l)=>{el('text',{x:8,y:y+4,'font-size':12,fill:'currentColor',opacity:.6},s).textContent='Level '+l});
+ Object.entries(TN).forEach(([n,v])=>{const kids=Object.keys(TN).filter(k=>TN[k][2]===n),role=!v[2]?'r':kids.length?'y':'g';
+  const g=el('g',{style:'cursor:pointer'},s);el('circle',{cx:v[0],cy:v[1],r:22,style:'fill:var(--'+role+')',stroke:'currentColor','stroke-width':3,class:'tc'},g);
+  el('text',{x:v[0],y:v[1]+6,'text-anchor':'middle','font-size':18,'font-weight':900,fill:role==='r'?'#fff':'#2b2340'},g).textContent=n;
+  g.onclick=()=>{const sib=Object.keys(TN).filter(k=>k!==n&&TN[k][2]===v[2]&&v[2]);
+   const t=`${n} ${v[2]?'adalah child dari '+v[2]:'adalah Root'}${kids.length?', sekaligus parent dari '+kids.join(' dan '):', tidak punya child, jadi disebut Leaf'}${sib.length?'. Sibling-nya adalah '+sib.join(' dan '):''}. Posisinya di level ${v[3]}.`;
+   $('tinfo').textContent=t;s.querySelectorAll('.tc').forEach(c=>c.setAttribute('stroke-width',3));g.firstChild.setAttribute('stroke-width',7);beep(700,.08);say(t)}})}
+const GP={A:[90,40],B:[310,40],C:[90,170],D:[310,170]},GE=[['A','B'],['B','D'],['D','C'],['C','A'],['A','D']];
+function drawGraph(){const s=$('gsvg');
+ GE.forEach(([a,b])=>el('line',{x1:GP[a][0],y1:GP[a][1],x2:GP[b][0],y2:GP[b][1],stroke:'currentColor','stroke-width':3,class:'ge','data-e':a+b},s));
+ Object.entries(GP).forEach(([n,p])=>{const g=el('g',{style:'cursor:pointer'},s);el('circle',{cx:p[0],cy:p[1],r:22,style:'fill:var(--b)',stroke:'currentColor','stroke-width':3},g);
+  el('text',{x:p[0],y:p[1]+6,'text-anchor':'middle','font-size':18,'font-weight':900,fill:'#fff'},g).textContent=n;
+  g.onclick=()=>{const nb=GE.filter(e=>e.includes(n)).map(e=>e[0]===n?e[1]:e[0]);
+   s.querySelectorAll('.ge').forEach(l=>{const on=l.dataset.e.includes(n);l.setAttribute('stroke-width',on?7:3);l.style.stroke=on?'var(--ac)':''});
+   const t=`Vertex ${n} punya degree ${nb.length}, karena terhubung ke ${nb.join(' dan ')}.`;$('ginfo').textContent=t;beep(700,.08);say(t)}})}
+// builder
+const BN=['A','B','C','D','E'],BP={};BN.forEach((n,i)=>{const a=-Math.PI/2+i*2*Math.PI/5;BP[n]=[200+95*Math.cos(a),130+95*Math.sin(a)]});
+const BE=new Set();let bsel=null,bgoal=0,bwon=false;
+function goal(g){bgoal=g;bwon=false;BE.clear();bsel=null;$('gl').className='ibox';$('gl').textContent={1:'Tantangan 1: hubungkan kelima vertex sehingga menjadi Tree (terhubung dan tanpa siklus).',2:'Tantangan 2: buat graph yang punya siklus, yaitu jalur yang kembali ke vertex awal.',3:'Tantangan 3: buat graph terhubung dengan vertex A berderajat 3.'}[g];drawB()}
+function stats(){const par={};BN.forEach(n=>par[n]=n);const f=x=>par[x]===x?x:(par[x]=f(par[x]));
+ const deg={};BN.forEach(n=>deg[n]=0);BE.forEach(e=>{deg[e[0]]++;deg[e[1]]++;par[f(e[0])]=f(e[1])});
+ const comps=new Set(BN.map(f)).size,E=BE.size;return{deg,E,comps,conn:comps===1,cyc:E>5-comps}}
+function drawB(){const s=$('bsvg');s.innerHTML='';
+ BE.forEach(e=>el('line',{x1:BP[e[0]][0],y1:BP[e[0]][1],x2:BP[e[1]][0],y2:BP[e[1]][1],stroke:'currentColor','stroke-width':4},s));
+ BN.forEach(n=>{const g=el('g',{style:'cursor:pointer'},s);el('circle',{cx:BP[n][0],cy:BP[n][1],r:24,style:'fill:var(--'+(bsel===n?'y':'b')+')',stroke:'currentColor','stroke-width':bsel===n?7:3},g);
+  el('text',{x:BP[n][0],y:BP[n][1]+6,'text-anchor':'middle','font-size':18,'font-weight':900,fill:bsel===n?'#2b2340':'#fff'},g).textContent=n;
+  g.onclick=()=>{beep(700,.06);if(!bsel)bsel=n;else if(bsel===n)bsel=null;else{const e=[bsel,n].sort().join('');BE.has(e)?BE.delete(e):BE.add(e);bsel=null}drawB()}});
+ const st=stats(),kind=st.conn&&!st.cyc?'Tree':st.conn?'Graph terhubung dengan siklus':st.cyc?'Graph tidak terhubung, punya siklus':'Graph tidak terhubung';
+ $('bstat').innerHTML=`Edge: <b>${st.E}</b> (Tree dengan 5 vertex punya 4 edge)<br>Degree: ${BN.map(n=>n+'='+st.deg[n]).join(', ')}<br>Jenis: <b>${kind}</b>`;
+ const ok=bgoal===1?st.conn&&!st.cyc:bgoal===2?st.cyc:bgoal===3?st.conn&&st.deg.A===3:false;
+ if(ok&&!bwon){bwon=true;beep(1000,.3);const m='🎉 Berhasil! '+kind+'.';$('gl').className='ibox win';$('gl').textContent=m;say('Berhasil! '+kind)}else if(!ok&&bwon){bwon=false;$('gl').className='ibox'}}
+drawTree();drawGraph();drawB();
+
+// ===== ILUSTRASI PAPAN LUDO =====
+function ludoArt(){const C=['#e63946','#2a9d5c','#f4b400','#2f6fed'],K='#2b2340';
+ let h='<rect x="0" y="0" width="300" height="300" rx="16" fill="#fffdf5" stroke="'+K+'" stroke-width="6"/>';
+ const cross=(c,r)=>(c>=6&&c<=8||r>=6&&r<=8)&&!(c>=6&&c<=8&&r>=6&&r<=8);
+ const fill={};const put=(c,r,i)=>fill[c+','+r]=C[i];
+ for(let i=1;i<=5;i++){put(i,7,0);put(7,i,1);put(14-i,7,2);put(7,14-i,3)}
+ put(1,6,0);put(8,1,1);put(13,8,2);put(6,13,3);
+ for(let r=0;r<15;r++)for(let c=0;c<15;c++)if(cross(c,r))h+=`<rect x="${c*20}" y="${r*20}" width="20" height="20" fill="${fill[c+','+r]||'#fffdf5'}" stroke="${K}" stroke-opacity=".45"/>`;
+ [[0,0,0],[9,0,1],[9,9,2],[0,9,3]].forEach(([c,r,i])=>{const x=c*20,y=r*20;
+  h+=`<rect x="${x}" y="${y}" width="120" height="120" fill="${C[i]}" stroke="${K}" stroke-width="2"/><rect x="${x+20}" y="${y+20}" width="80" height="80" rx="14" fill="#fffdf5" stroke="${K}" stroke-width="3"/>`;
+  [[40,40],[80,40],[40,80],[80,80]].forEach(([a,b])=>h+=`<circle cx="${x+a}" cy="${y+b}" r="11" fill="${C[i]}" stroke="${K}" stroke-width="2"/>`)});
+ h+=`<polygon points="120,120 180,120 150,150" fill="${C[1]}" stroke="${K}" stroke-width="2"/><polygon points="180,120 180,180 150,150" fill="${C[2]}" stroke="${K}" stroke-width="2"/><polygon points="120,180 180,180 150,150" fill="${C[3]}" stroke="${K}" stroke-width="2"/><polygon points="120,120 120,180 150,150" fill="${C[0]}" stroke="${K}" stroke-width="2"/>`;
+ [[7,3,'🌳'],[3,8,'📊'],[11,6,'⭐'],[7,11,'🔀'],[7,5,'⚡'],[12,8,'🌳']].forEach(([c,r,e])=>h+=`<text x="${c*20+10}" y="${r*20+15}" font-size="13" text-anchor="middle">${e}</text>`);
+ [[2,6,0,0],[8,2,1,.3],[11,8,2,.6],[6,12,3,.9]].forEach(([c,r,i,d])=>h+=`<g class="bob" style="animation-delay:${d}s;transform-box:fill-box"><circle cx="${c*20+10}" cy="${r*20+10}" r="9" fill="${C[i]}" stroke="#fff" stroke-width="3"/><circle cx="${c*20+10}" cy="${r*20+10}" r="11.5" fill="none" stroke="${K}" stroke-width="2"/></g>`);
+ return h}
+document.querySelectorAll('.art').forEach(e=>e.innerHTML=ludoArt());
+
+// ===== ANIMASI MENANG =====
+const RM=matchMedia('(prefers-reduced-motion:reduce)');
+const CF={p:[],on:false,rain:0,
+ add(x,y,vx,vy){CF.p.push({x,y,vx,vy,r:Math.random()*6.28,vr:(Math.random()-.5)*.4,s:6+Math.random()*7,c:['#e63946','#2a9d5c','#f4b400','#2f6fed','#ff8fab','#ffffff'][Math.floor(Math.random()*6)],l:0})},
+ burst(x,y,n){if(RM.matches)return;for(let i=0;i<n;i++){const a=Math.random()*6.28,v=4+Math.random()*9;CF.add(x,y,Math.cos(a)*v,Math.sin(a)*v-5)}CF.go()},
+ shower(ms){if(RM.matches)return;CF.rain=Date.now()+ms;CF.go()},
+ go(){if(CF.on)return;CF.on=true;const cv=$('cf'),x=cv.getContext('2d');
+  const loop=()=>{cv.width=innerWidth;cv.height=innerHeight;
+   if(Date.now()<CF.rain)for(let i=0;i<4;i++)CF.add(Math.random()*cv.width,-10,(Math.random()-.5)*3,2+Math.random()*3);
+   CF.p=CF.p.filter(p=>p.y<cv.height+20&&p.l<420);
+   CF.p.forEach(p=>{p.vy+=.18;p.vx*=.99;p.x+=p.vx;p.y+=p.vy;p.r+=p.vr;p.l++;x.save();x.translate(p.x,p.y);x.rotate(p.r);x.fillStyle=p.c;x.fillRect(-p.s/2,-p.s/4,p.s,p.s/2);x.restore()});
+   if(CF.p.length||Date.now()<CF.rain)requestAnimationFrame(loop);else{CF.on=false;x.clearRect(0,0,cv.width,cv.height)}};loop()}};
+function fanfare(){[523,659,784,1047,784,1047].forEach((f,i)=>setTimeout(()=>beep(f,.22),i*160))}
+function fx(i){const e=$('pw'+i);if(!e)return;e.classList.add('win');const b=e.getBoundingClientRect();CF.burst(b.left+b.width/2,b.top+b.height/2,90);fanfare()}
+function celebrate(r,w){const t=r[0];
+ $('winbox').innerHTML=`<div class="crown">👑</div><div class="wn" style="color:var(--${t.k})">${t.name}</div><div class="wl">${w?'Sampai pusat lebih dulu!':'Skor tertinggi saat waktu habis!'}</div><div class="wp">${t.score} poin</div>`;
+ const hs=[130,95,65],ord=r.length>=3?[1,0,2]:r.length===2?[1,0]:[0];
+ $('pod').innerHTML=ord.filter(i=>r[i]).map(i=>`<div class="pcol"><div class="pn">${r[i].name}</div><div class="pb ${r[i].k}" style="--h:${hs[i]}px;animation-delay:${[1.1,.6,.2][i]}s"><span style="font-size:1.8rem">${['🥇','🥈','🥉'][i]}</span><span>${r[i].score}</span></div></div>`).join('');
+ fanfare();CF.shower(4500);[.2,.5,.8].forEach(x=>setTimeout(()=>CF.burst(innerWidth*x,innerHeight*.35,70),x*1200))}
+
+
+// ===== MODE GURU =====
+(function(){
+ if(new URLSearchParams(location.search).get('debug')!=='1')return;
+ const cfg={n:3,win:0,dice:1,step:0,held:null,lastW:null,run:0};let tab='m';const LG=[];
+ const log=m=>{LG.push(new Date().toLocaleTimeString('id-ID')+'  '+m);if(LG.length>300)LG.shift();if(tab==='l'&&P.style.display!=='none')render()};
+ const h=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.innerHTML=x;return e};
+ const st=h('style',0,`.dbg-badge{position:fixed;left:10px;bottom:10px;z-index:96;font:800 .8rem sans-serif;padding:8px 12px;border:3px solid var(--ink);border-radius:20px;background:#f4b400;color:#2b2340;cursor:pointer;box-shadow:0 3px 0 var(--ink)}
+.dbg-p{position:fixed;left:0;right:0;bottom:0;z-index:95;max-height:52vh;overflow:auto;background:var(--card);color:var(--ink);border-top:4px solid var(--ink);padding:10px 12px calc(10px + env(safe-area-inset-bottom,0px));font-size:.9rem}
+.dbg-h{display:flex;flex-wrap:wrap;gap:4px;align-items:center;position:sticky;top:-10px;background:var(--card);padding:4px 0;margin-bottom:6px}
+.dbg-t,.dbg-bt{font:700 .85rem sans-serif;padding:6px 10px;border:2px solid var(--ink);border-radius:10px;background:var(--card);color:var(--ink);cursor:pointer;margin:2px}
+.dbg-t.on,.dbg-bt.go{background:var(--y);color:#2b2340}.dbg-bt.g{background:var(--g);color:#fff}
+.dbg-p select{font:inherit;padding:4px;border:2px solid var(--ink);border-radius:8px;background:var(--card);color:var(--ink)}
+.dbg-s{padding:4px 8px;border-radius:8px}.dbg-s.cur{background:rgba(244,180,0,.35);font-weight:800}.dbg-s.ok{opacity:.65}
+.dbg-q{display:flex;gap:6px;align-items:center;border-bottom:1px solid rgba(127,127,127,.4);padding:3px 0;font-size:.8rem}
+.dbg-w{color:#e63946;font-weight:800}.dbg-p pre{white-space:pre-wrap;font-size:.75rem;max-height:30vh;overflow:auto}
+.dbg-cap{position:fixed;top:calc(8px + env(safe-area-inset-top,0px));left:8px;right:8px;z-index:97;display:none;align-items:center;gap:8px;justify-content:center;font:800 .9rem sans-serif}
+.dbg-cap span{background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:20px}`);
+ document.head.appendChild(st);
+ const bd=h('div','dbg-badge','🛠️ DEBUG'),P=h('div','dbg-p'),cap=h('div','dbg-cap','<span></span><button class="dbg-t" data-a="capnext">▶ Lanjut</button><button class="dbg-t" data-a="open">🛠️</button>');
+ P.style.display='none';document.body.append(bd,P,cap);
+ addEventListener('error',e=>log('ERROR: '+e.message));
+ const fmt={roll:()=>'lempar dadu',move:v=>'pion bergerak '+v+' langkah',act:p=>p.name+' berhenti di petak '+typeOf(p,p.pos),ask:k=>'soal '+k+' ditampilkan',resolve:o=>'jawaban '+(o?'benar':'salah / waktu habis'),finish:w=>'game selesai, pemenang: '+(w?w.name:'ditentukan skor/waktu'),next:()=>'giliran berikutnya'};
+ Object.keys(fmt).forEach(n=>{const o=window[n];if(typeof o!=='function')return;window[n]=function(...a){try{log(fmt[n](...a))}catch(e){}return o.apply(this,a)}});
+ const dbgStart=n=>{pickN(n);start()};
+ const STG=[
+ ['Siapkan papan: pion pemenang 1 langkah sebelum pusat',()=>{dbgStart(cfg.n);const P2=G.players;P2.forEach((q,i)=>{q.score=i===cfg.win?50:[300,200,150][i%3]});P2[cfg.win].pos=55;G.cur=cfg.win;P2.forEach((_,i)=>place(i));turn();hud();$('rb').disabled=true}],
+ ['Lempar dadu',()=>{const d=$('dice');d.classList.add('roll');beep(700,.1);setTimeout(()=>{d.classList.remove('roll');d.textContent='⚀⚁⚂⚃⚄⚅'[cfg.dice-1]},500)}],
+ ['Pion bergerak ke pusat papan',()=>{const p=G.players[cfg.win];p.pos=Math.min(p.pos+cfg.dice,56);place(cfg.win)}],
+ ['Efek di papan: pion berputar, konfeti, fanfare',()=>fx(cfg.win)],
+ ['Poin +200 dan notifikasi',()=>{const p=G.players[cfg.win];p.score+=200;hud();toast('🏁 '+p.name+' sampai pusat! +200')}],
+ ['Game berakhir: layar hasil dan peringkat (animasi ditahan)',()=>{const rc=celebrate;celebrate=(r,w)=>{cfg.held=[r,w]};cfg.lastW=G.players[cfg.win];finish(cfg.lastW);celebrate=rc}],
+ ['Animasi pemenang: kartu emas, mahkota, podium, konfeti',()=>{if(cfg.held)celebrate(...cfg.held)}]];
+ function setCap(){const c=cap.firstChild;c.textContent=cfg.step>=STG.length?'Semua tahap selesai':`Tahap ${cfg.step}/${STG.length}: ${STG[cfg.step-1][0]}`;cap.style.display='flex'}
+ function nxt(){if(cfg.step>=STG.length)return false;log('Tahap '+(cfg.step+1)+': '+STG[cfg.step][0]);STG[cfg.step][1]();cfg.step++;setCap();return true}
+ function reset(){cfg.run++;cfg.step=0;cfg.held=null;cap.style.display='none';render()}
+ function auto(){reset();const t=cfg.run;P.style.display='none';const go=()=>{if(t!==cfg.run||!nxt())return;setTimeout(go,cfg.step===4?1800:1500)};go();setTimeout(()=>{if(t===cfg.run){P.style.display='block';render()}},STG.length*1600+5000)}
+ function scen(k){dbgStart(cfg.n);const A=G.players;
+  if(k==='win'){A.forEach((p,i)=>p.score=i===cfg.win?50:[300,200,150][i%3]);A[cfg.win].pos=56;A[cfg.win].score+=200;cfg.lastW=A[cfg.win]}
+  else{A.forEach((p,i)=>p.score=[400,250,150,100][i]);if(k==='tie')A[1].score=A[0].score;if(k==='time')A[A.length-1].score=500;cfg.lastW=null;
+   if(k==='tie')log('PERINGATAN: skor seri. Pemenang hanya ditentukan urutan pemain (aturan seri belum ada).')}
+  A.forEach((_,i)=>place(i));hud();finish(cfg.lastW);P.style.display='none'}
+ function valid(q){const w=[],o=q[3];if(q[4]<0||q[4]>=o.length)w.push('kunci di luar jangkauan');if(new Set(o).size<o.length)w.push('opsi duplikat');if(!q[5])w.push('tanpa penjelasan');if(o[q[4]]&&o[q[4]].length>4&&q[1].includes(o[q[4]]))w.push('jawaban muncul di soal');return w}
+ function render(){const tabs=[['m','🏆 Menang'],['s','🖥️ Layar & Media'],['q','❓ Soal'],['l','📜 Log']];let b='';
+  if(tab==='m'){const ord=cfg.n===2?[0,2]:[0,1,2,3],op=(a,sel)=>a.map(([v,t])=>`<option value="${v}" ${v==sel?'selected':''}>${t}</option>`).join('');
+   b=`<div>Pemain <select data-k="n">${op([2,3,4].map(x=>[x,x]),cfg.n)}</select> Pemenang <select data-k="win">${op(Array.from({length:cfg.n},(_,i)=>[i,'Pemain '+(i+1)+' ('+COL[ord[i]].n+')']),cfg.win)}</select> Dadu <select data-k="dice">${op([1,2,3,4,5,6].map(x=>[x,x]),cfg.dice)}</select></div>
+   <p style="margin:6px 0"><b>Tahap kondisi menang (finish):</b></p>${STG.map((x,i)=>`<div class="dbg-s ${i<cfg.step?'ok':i===cfg.step?'cur':''}">${i<cfg.step?'✅':i===cfg.step?'👉':'⬜'} ${i+1}. ${x[0]}</div>`).join('')}
+   <div><button class="dbg-bt g" data-a="nxt">▶ Langkah berikutnya</button><button class="dbg-bt go" data-a="auto">⏩ Putar otomatis</button><button class="dbg-bt" data-a="reset">↺ Reset</button></div>
+   <p style="margin:8px 0 2px"><b>Lompat langsung:</b></p><div><button class="dbg-bt" data-a="scen" data-v="win">Menang lewat pusat</button><button class="dbg-bt" data-a="scen" data-v="time">Waktu habis (skor beda)</button><button class="dbg-bt" data-a="scen" data-v="tie">Waktu habis (skor seri)</button><button class="dbg-bt" data-a="replay">🔁 Ulang animasi pemenang</button></div>`}
+  if(tab==='s'){const sc=[['splash','Splash'],['menu','Menu'],['materi','Materi'],['cara','Cara Bermain'],['tentang','Tentang'],['lab','Lab Praktik'],['players','Pilih Pemain'],['game','Papan (game uji)'],['hasil','Hasil (demo menang)']],vs='speechSynthesis' in window?speechSynthesis.getVoices().filter(v=>v.lang.toLowerCase().startsWith('id')).length:-1;
+   b=`<p><b>Buka layar:</b></p><div>${sc.map(([k,t])=>`<button class="dbg-bt" data-a="scr" data-v="${k}">${t}</button>`).join('')}</div><p style="margin-top:8px"><b>Audio &amp; dukungan:</b></p>
+   <div><button class="dbg-bt" data-a="voice">🔊 Tes suara</button><button class="dbg-bt" data-a="snd" data-v="700">Klik</button><button class="dbg-bt" data-a="snd" data-v="1000">Benar</button><button class="dbg-bt" data-a="snd" data-v="300">Salah</button><button class="dbg-bt" data-a="fan">Fanfare</button></div>
+   <p>Web Speech: ${vs<0?'❌ tidak ada':'✅'} · Suara Indonesia: ${vs<0?'-':vs>0?'✅ '+vs:'⚠️ tidak ditemukan'} · Web Audio: ${window.AudioContext||window.webkitAudioContext?'✅':'❌'} · Layar: ${innerWidth}×${innerHeight}</p>`}
+  if(tab==='q'){const pos=[0,0,0,0],cat={t:0,g:0,m:0};Q.forEach(q=>{pos[q[4]]++;cat[q[0]]++});const bad=Q.map((q,i)=>[i,valid(q)]).filter(x=>x[1].length);
+   b=`<p><b>${Q.length} soal</b> · Tree ${cat.t} · Graph ${cat.g} · Mix ${cat.m} · Sulit ${Q.filter(q=>q[6]).length}<br>Posisi kunci di data (A/B/C/D): ${pos.join(' / ')} (urutan opsi diacak saat game)<br>${bad.length?'<span class="dbg-w">⚠️ '+bad.length+' soal perlu dicek</span>':'✅ Validasi otomatis lolos'}</p>`+Q.map((q,i)=>{const w=valid(q);return `<div class="dbg-q"><span>${i+1}.[${q[0]}${q[6]?'⚡':''}]</span><span style="flex:1">${q[1].slice(0,70)}<br>✓ ${q[3][q[4]]}${w.length?' <span class="dbg-w">⚠️ '+w.join(', ')+'</span>':''}</span><button class="dbg-bt" data-a="uji" data-v="${i}">Uji</button></div>`}).join('')}
+  if(tab==='l')b=`<div><button class="dbg-bt" data-a="copy">Salin log</button><button class="dbg-bt" data-a="clr">Hapus</button></div><pre>${LG.slice(-80).join('\n')||'(kosong)'}</pre>`;
+  P.innerHTML=`<div class="dbg-h"><b>🛠️ Mode Guru</b>${tabs.map(([k,t])=>`<button class="dbg-t ${k===tab?'on':''}" data-a="tab" data-v="${k}">${t}</button>`).join('')}<button class="dbg-t" data-a="hide">✖</button></div>${b}`}
+ const A={tab:v=>{tab=v;render()},hide:()=>{P.style.display='none'},open:()=>{P.style.display='block';render()},
+  nxt:()=>{P.style.display='none';nxt()},capnext:()=>{if(!nxt())toast('Semua tahap sudah selesai')},auto,reset,scen,
+  replay:()=>{if(!G.players||!G.over)return toast('Jalankan skenario menang dulu');P.style.display='none';celebrate([...G.players].sort((a,b)=>b.score-a.score),cfg.lastW)},
+  scr:v=>{if(v==='hasil')return scen('win');if(v==='game'&&!G.players)dbgStart(2);show(v)},
+  voice:()=>{if('speechSynthesis' in window){speechSynthesis.cancel();const u=new SpeechSynthesisUtterance('Halo, ini tes suara untuk materi struktur data.');u.lang='id-ID';speechSynthesis.speak(u)}},
+  snd:v=>beep(+v,.25),fan:()=>fanfare(),
+  uji:v=>{const q=Q[+v];if(!G.players||G.over)dbgStart(2);show('game');deck[q[0]]=[q];P.style.display='none';ask(q[0])},
+  copy:()=>{try{navigator.clipboard.writeText(LG.join('\n')).then(()=>toast('Log disalin'),()=>toast('Gagal menyalin'))}catch(e){toast('Gagal menyalin')}},clr:()=>{LG.length=0;render()}};
+ const run=e=>{const t=e.target.closest('[data-a]');if(t&&A[t.dataset.a])A[t.dataset.a](t.dataset.v)};
+ P.addEventListener('click',run);cap.addEventListener('click',run);bd.addEventListener('click',()=>A.open());
+ P.addEventListener('change',e=>{const k=e.target.dataset.k;if(!k)return;cfg[k]=+e.target.value;if(cfg.win>=cfg.n)cfg.win=0;reset()});
+ log('Mode guru aktif');
+})();
+// ===== AKHIR MODE GURU =====
+// Untuk menghapus Mode Guru: hapus semua kode dari "// ===== MODE GURU =====" sampai "// ===== AKHIR MODE GURU ====="
+
+</script></body></html>
