@@ -628,6 +628,48 @@
          color: #fff
       }
 
+      .ref-display {
+         background: rgba(127, 127, 127, .08);
+         border: 3px solid var(--ink);
+         border-radius: 12px;
+         padding: 16px;
+         margin: 16px 0;
+         display: none;
+      }
+
+      .ref-display.show {
+         display: block;
+      }
+
+      .ref-item {
+         margin-bottom: 16px;
+         padding-bottom: 12px;
+         border-bottom: 2px dashed rgba(43, 35, 64, .2);
+      }
+
+      .ref-item:last-child {
+         border-bottom: none;
+         margin-bottom: 0;
+         padding-bottom: 0;
+      }
+
+      .ref-label {
+         font-weight: 800;
+         color: var(--ink);
+         margin-bottom: 6px;
+         font-size: 0.95rem;
+      }
+
+      .ref-answer {
+         background: var(--card);
+         padding: 10px 12px;
+         border-radius: 8px;
+         border: 2px solid var(--ink);
+         line-height: 1.6;
+         white-space: pre-wrap;
+         word-wrap: break-word;
+      }
+
       body {
          background-image: radial-gradient(rgba(127, 127, 127, .18) 2px, transparent 2px);
          background-size: 26px 26px
@@ -1169,6 +1211,19 @@
             font-size: 0.9rem;
             padding: 4px 14px;
          }
+
+         .ref-display {
+            padding: 12px;
+         }
+
+         .ref-label {
+            font-size: 0.9rem;
+         }
+
+         .ref-answer {
+            padding: 8px 10px;
+            font-size: 0.9rem;
+         }
       }
 
       @media (max-width: 480px) {
@@ -1550,7 +1605,9 @@ C ━━ D</pre>
          <label>3. Di mana kamu menemukan Tree dan Graph dalam kehidupan sehari-hari?</label><textarea
             id="f3"></textarea>
          <label>4. Strategi apa yang kamu pakai saat menjawab?</label><textarea id="f4"></textarea>
-         <button class="btn go" onclick="copyRef()">Salin refleksi</button>
+         <button class="btn go" onclick="showRef()">Tampilkan Refleksi</button>
+         <div id="refDisplay" class="ref-display"></div>
+         <button id="copyRefBtn" class="btn" onclick="copyRef()" style="display:none">📋 Salin Refleksi</button>
       </div>
       <div class="center"><button class="btn" onclick="show('players')">Main lagi</button><button class="btn alt"
             onclick="show('materi')">Materi</button><button class="btn alt" onclick="show('menu')">Menu</button></div>
@@ -1708,6 +1765,46 @@ C ━━ D</pre>
       function copyRef() {
          const t = ['Beda Tree dan Graph', 'Soal yang paling membuat berpikir', 'Contoh Tree/Graph sehari-hari', 'Strategi'].map((l, i) => l + ': ' + $('f' + (i + 1)).value).join('\n');
          try { navigator.clipboard.writeText(t).then(() => toast('Refleksi disalin'), () => toast('Gagal menyalin, salin manual')) } catch (e) { toast('Gagal menyalin, salin manual') }
+      }
+
+      function showRef() {
+         const questions = [
+            'Apa beda Tree dan Graph menurutmu?',
+            'Soal mana yang paling membuatmu berpikir?',
+            'Di mana kamu menemukan Tree dan Graph dalam kehidupan sehari-hari?',
+            'Strategi apa yang kamu pakai saat menjawab?'
+         ];
+         
+         let allFilled = true;
+         for (let i = 1; i <= 4; i++) {
+            if (!$('f' + i).value.trim()) {
+               allFilled = false;
+               break;
+            }
+         }
+         
+         if (!allFilled) {
+            toast('⚠️ Lengkapi semua pertanyaan refleksi terlebih dahulu');
+            return;
+         }
+         
+         let html = '<h3 style="margin-bottom:16px;color:var(--g)">📝 Refleksi Kamu</h3>';
+         questions.forEach((q, i) => {
+            const answer = $('f' + (i + 1)).value.trim();
+            html += `<div class="ref-item">
+               <div class="ref-label">${i + 1}. ${q}</div>
+               <div class="ref-answer">${answer || '<em style="color:var(--mut)">Belum diisi</em>'}</div>
+            </div>`;
+         });
+         
+         $('refDisplay').innerHTML = html;
+         $('refDisplay').classList.add('show');
+         $('copyRefBtn').style.display = 'inline-block';
+         
+         // Scroll ke tampilan refleksi
+         $('refDisplay').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+         
+         toast('✅ Refleksi ditampilkan!');
       }
 
       // ===== AUDIO MATERI =====
