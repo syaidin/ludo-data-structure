@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Responsive - Ludo Data Structure</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            background: #f4ecd8;
+        }
+        h1 {
+            color: #2b2340;
+            text-align: center;
+        }
+        .info {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 3px solid #2b2340;
+        }
+        .device-info {
+            background: #e4f1ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+        .status {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin: 5px;
+            font-weight: bold;
+        }
+        .optimal { background: #2a9d5c; color: white; }
+        .warning { background: #f4b400; color: #2b2340; }
+        .button {
+            display: inline-block;
+            background: #2a9d5c;
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: bold;
+            margin: 10px 5px;
+            border: 3px solid #2b2340;
+            box-shadow: 0 4px 0 #2b2340;
+            text-align: center;
+        }
+        .button:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #2b2340;
+        }
+        .test-area {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            border: 3px solid #2b2340;
+            margin: 20px 0;
+        }
+        code {
+            background: #f0f0f0;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        @media (max-width: 768px) {
+            .info { padding: 15px; }
+            h1 { font-size: 1.5rem; }
+        }
+        @media (max-width: 480px) {
+            body { padding: 10px; }
+            .button { 
+                display: block; 
+                margin: 10px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test Responsive Mobile</h1>
+    <h2 style="text-align: center; color: #6b6280;">Ludo Data Structure</h2>
+    
+    <div class="info">
+        <h3>📱 Informasi Layar Anda</h3>
+        <div class="device-info">
+            <div>Lebar Layar: <span id="width"></span>px</div>
+            <div>Tinggi Layar: <span id="height"></span>px</div>
+            <div>Orientasi: <span id="orientation"></span></div>
+            <div>Breakpoint: <span id="breakpoint"></span></div>
+        </div>
+    </div>
+
+    <div class="test-area">
+        <h3>✅ Status Optimasi</h3>
+        <p><strong>Ukuran layar Anda:</strong></p>
+        <div id="status"></div>
+        <p style="margin-top: 15px;"><strong>Rekomendasi:</strong></p>
+        <p id="recommendation"></p>
+    </div>
+
+    <div class="info">
+        <h3>🎮 Cara Test Game</h3>
+        <ol>
+            <li>Klik tombol "Buka Game" di bawah</li>
+            <li>Coba semua menu dan fitur</li>
+            <li>Test di mode Portrait (vertikal) dan Landscape (horizontal)</li>
+            <li>Pastikan semua tombol mudah diklik dengan jari</li>
+            <li>Test papan Ludo, dadu, dan soal</li>
+        </ol>
+    </div>
+
+    <div style="text-align: center;">
+        <a href="index.html" class="button">🎲 Buka Game Ludo</a>
+        <a href="index.html?debug=1" class="button" style="background: #f4b400; color: #2b2340;">🛠️ Mode Guru (Debug)</a>
+    </div>
+
+    <div class="info">
+        <h3>📐 Breakpoint yang Diterapkan</h3>
+        <ul>
+            <li><code>&gt; 768px</code> - Desktop/Tablet besar (Layout penuh)</li>
+            <li><code>≤ 768px</code> - Tablet/HP besar (Layout kompak)</li>
+            <li><code>≤ 480px</code> - HP kecil (Menu 1 kolom)</li>
+            <li><code>Landscape</code> - HP horizontal (Layout datar)</li>
+        </ul>
+    </div>
+
+    <div class="test-area">
+        <h3>🧪 Test Touch Area</h3>
+        <p>Coba tap button di bawah dengan jari. Seharusnya mudah dan nyaman:</p>
+        <button class="button" onclick="alert('✅ Touch bekerja dengan baik!')">
+            Tap Saya!
+        </button>
+    </div>
+
+    <div class="info">
+        <h3>💡 Tips Testing</h3>
+        <ul>
+            <li>Test dengan koneksi internet OFF (game offline)</li>
+            <li>Coba zoom in/out untuk test scalability</li>
+            <li>Test audio narasi di Lab Praktik</li>
+            <li>Test Mode Guru dengan menambah <code>?debug=1</code></li>
+            <li>Coba semua ukuran device di Chrome DevTools</li>
+        </ul>
+    </div>
+
+    <script>
+        function updateDeviceInfo() {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            const orientation = width > height ? 'Landscape (Horizontal)' : 'Portrait (Vertikal)';
+            
+            let breakpoint = 'Desktop';
+            let status = '';
+            let recommendation = '';
+            
+            if (width <= 480) {
+                breakpoint = 'HP Kecil';
+                status = '<span class="status optimal">✅ Optimal</span> Menu 1 kolom, font kecil';
+                recommendation = 'Mode Portrait direkomendasikan untuk gameplay. Semua fitur sudah dioptimasi.';
+            } else if (width <= 768) {
+                breakpoint = 'Tablet / HP Besar';
+                status = '<span class="status optimal">✅ Optimal</span> Menu 2 kolom, spacing kompak';
+                recommendation = 'Pengalaman bermain optimal. Coba mode Landscape untuk papan lebih besar.';
+            } else {
+                breakpoint = 'Desktop / Tablet Besar';
+                status = '<span class="status optimal">✅ Optimal</span> Layout penuh, semua fitur tersedia';
+                recommendation = 'Pengalaman terbaik! Semua elemen ditampilkan sempurna.';
+            }
+            
+            if (height < 600 && orientation === 'Landscape (Horizontal)') {
+                status += '<br><span class="status warning">⚠️ Landscape Mode</span> Layout lebih datar';
+                recommendation = 'Mode landscape aktif. Scroll mungkin diperlukan untuk konten panjang.';
+            }
+            
+            document.getElementById('width').textContent = width;
+            document.getElementById('height').textContent = height;
+            document.getElementById('orientation').textContent = orientation;
+            document.getElementById('breakpoint').textContent = breakpoint;
+            document.getElementById('status').innerHTML = status;
+            document.getElementById('recommendation').textContent = recommendation;
+        }
+        
+        // Update on load
+        updateDeviceInfo();
+        
+        // Update on resize
+        window.addEventListener('resize', updateDeviceInfo);
+        
+        // Update on orientation change
+        window.addEventListener('orientationchange', function() {
+            setTimeout(updateDeviceInfo, 100);
+        });
+    </script>
+</body>
+</html>
